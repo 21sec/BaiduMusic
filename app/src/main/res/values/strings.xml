@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">BaiduMusic</string>
-    <string name="action_settings">Settings</string>
-    <string name="activity_name">BaiduMusic 0.1Base</string>
+    <string name="action_edit">Edit</string>
+    <string name="search">Search</string>
 </resources>

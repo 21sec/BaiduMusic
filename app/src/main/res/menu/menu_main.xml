@@ -1,6 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+
+    <item android:id="@+id/action_search"
+        android:orderInCategory="80"
+        android:title="@string/search"
+        android:icon="@mipmap/search"
+        app:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_edit"
+        android:orderInCategory="80"
+        android:title="@string/action_edit"
+        android:icon="@mipmap/ab_edit"
+        app:showAsAction="ifRoom" />
+
 </menu>
