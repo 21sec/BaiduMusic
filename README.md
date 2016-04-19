@@ -17,5 +17,3 @@
   完成以上3个修改,应该就可以正常导入了,如果还是不请,请自行对比github中的编译文件和 本地项目产生的编译文件有何不同之处    
 
 
-3.项目使用了volley等lib,在studio中, app/libs/ 右键选中volley jar , 在弹出的菜单中选择Add As Library
-
