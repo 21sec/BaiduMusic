@@ -1,18 +1,37 @@
 package demo.music.baidumusic;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG = "BaiduMusic";
     RequestQueue mQueue;
+    JsonObjectRequest jsonObjectRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +48,18 @@ public class MainActivity extends AppCompatActivity {
         //toolbar 右侧的图标点击后，触发回调
         toolbar.setOnMenuItemClickListener(onMenuItemClick);
 
-        //生成volley的工作队列
+        //创建volley的工作队列
         mQueue = Volley.newRequestQueue(getApplicationContext());
+
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
 
 
     private Toolbar.OnMenuItemClickListener onMenuItemClick = new Toolbar.OnMenuItemClickListener() {
@@ -44,6 +72,89 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.action_search:
                     msg += "Click search";
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Music Name:");
+                    final EditText editText = new EditText(MainActivity.this);
+                    builder.setView(editText);
+                    builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String mucis = editText.getText().toString();
+                            String url;
+                            try{
+                                 url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.search.catalogSug&query="+URLEncoder.encode(mucis,"UTF-8");
+                            }catch(UnsupportedEncodingException e){
+                                e.printStackTrace();
+                                url = "";
+                            }
+                            jsonObjectRequest = new JsonObjectRequest(url, null,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            try{
+                                                JSONArray j = response.getJSONArray("song");
+                                                JSONObject x= j.getJSONObject(0);
+                                                String songid = x.getString("songid");
+                                                String url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.song.downWeb&songid="+songid+"&bit=flac&_t="+System.currentTimeMillis();
+                                                mQueue.add(new JsonObjectRequest(url, null,
+                                                        new Response.Listener<JSONObject>() {
+                                                            @Override
+                                                            public void onResponse(JSONObject response) {
+                                                                Log.d(TAG, response.toString());
+                                                                try{
+                                                                    JSONArray ja = response.getJSONArray("bitrate");
+                                                                    int maxbitrate = 0;
+                                                                    int maxcount = 0;
+                                                                    for(int i = 0 ; i < ja.length();i++){
+                                                                        JSONObject x = ja.getJSONObject(i);
+
+                                                                        if(x.getInt("file_bitrate") > maxbitrate && !(x.getString("show_link").equals(""))){
+                                                                            maxbitrate = x.getInt("file_bitrate");
+                                                                            maxcount = i;
+                                                                        }
+                                                                    }
+
+                                                                    String link = ja.getJSONObject(maxcount).getString("show_link");
+                                                                    Log.d(TAG, "下载地址" + link);
+                                                                    ClipboardManager clip = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                                                                    clip.setPrimaryClip(ClipData.newPlainText(null,link));
+                                                                    Intent intent = new Intent();
+                                                                    intent.setAction("android.intent.action.VIEW");
+                                                                    Uri content_url = Uri.parse(link);
+                                                                    intent.setData(content_url);
+                                                                    startActivity(intent);
+                                                                }catch (JSONException e){
+                                                                    e.printStackTrace();
+                                                                }
+                                                            }
+                                                        }, new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError error) {
+                                                        Log.e(TAG, error.getMessage(), error);
+                                                    }
+                                                }));
+                                            }catch (JSONException e){
+                                                e.printStackTrace();
+                                            }
+
+                                        }
+                                    }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.e(TAG, error.getMessage(), error);
+                                }
+                            });
+                            mQueue.add(jsonObjectRequest);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+                    builder.show();
                     break;
             }
             if (!msg.equals("")) {
@@ -53,12 +164,4 @@ public class MainActivity extends AppCompatActivity {
         }
 
     };
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
 }
