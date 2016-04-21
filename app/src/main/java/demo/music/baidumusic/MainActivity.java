@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,6 +31,7 @@ import java.net.URLEncoder;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG = "BaiduMusic";
+    //volley的用法可参考 http://www.kwstu.com/ArticleView/kwstu_20144118313429
     RequestQueue mQueue;
     JsonObjectRequest jsonObjectRequest;
 
@@ -106,24 +108,40 @@ public class MainActivity extends AppCompatActivity {
                                                                     JSONArray ja = response.getJSONArray("bitrate");
                                                                     int maxbitrate = 0;
                                                                     int maxcount = 0;
+                                                                    boolean filelink = true;
                                                                     for(int i = 0 ; i < ja.length();i++){
                                                                         JSONObject x = ja.getJSONObject(i);
 
-                                                                        if(x.getInt("file_bitrate") > maxbitrate && !(x.getString("show_link").equals(""))){
-                                                                            maxbitrate = x.getInt("file_bitrate");
-                                                                            maxcount = i;
+                                                                        if(x.getInt("file_bitrate") > maxbitrate){
+                                                                            if(!x.getString("show_link").equals("")){
+                                                                                filelink = false;
+                                                                                maxbitrate = x.getInt("file_bitrate");
+                                                                                maxcount = i;
+                                                                            }
+                                                                            else if (!x.getString("file_link").equals("")){
+                                                                                filelink = true;
+                                                                                maxbitrate = x.getInt("file_bitrate");
+                                                                                maxcount = i;
+                                                                            }
                                                                         }
                                                                     }
-
-                                                                    String link = ja.getJSONObject(maxcount).getString("show_link");
+                                                                    Log.d(TAG,"link is " + (filelink?"file_link":"show_link"));
+                                                                    String link = ja.getJSONObject(maxcount).getString(filelink?"file_link":"show_link");
                                                                     Log.d(TAG, "下载地址" + link);
-                                                                    ClipboardManager clip = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-                                                                    clip.setPrimaryClip(ClipData.newPlainText(null,link));
-                                                                    Intent intent = new Intent();
-                                                                    intent.setAction("android.intent.action.VIEW");
-                                                                    Uri content_url = Uri.parse(link);
-                                                                    intent.setData(content_url);
-                                                                    startActivity(intent);
+                                                                    //将下载地址复制到剪贴板
+                                                                    //ClipboardManager clip = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                                                                    //clip.setPrimaryClip(ClipData.newPlainText(null,link));
+                                                                    if(!link.equals("")){
+                                                                        Intent intent = new Intent();
+                                                                        intent.setAction("android.intent.action.VIEW");
+                                                                        Uri content_url = Uri.parse(link);
+                                                                        intent.setData(content_url);
+                                                                        startActivity(intent);
+                                                                    }
+                                                                    else{
+                                                                        Toast.makeText(MainActivity.this,"获取下载地址失败",Toast.LENGTH_SHORT).show();
+                                                                    }
+
                                                                 }catch (JSONException e){
                                                                     e.printStackTrace();
                                                                 }
