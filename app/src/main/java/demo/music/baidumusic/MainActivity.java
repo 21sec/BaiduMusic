@@ -1,9 +1,6 @@
 package demo.music.baidumusic;
 
 import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,6 +10,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -28,6 +27,8 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG = "BaiduMusic";
@@ -78,15 +79,21 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Music Name:");
                     final EditText editText = new EditText(MainActivity.this);
+                    //设置editText软键盘种类
+                    editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    editText.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+                    editText.setSingleLine(true);
                     builder.setView(editText);
+                    //dialog 空白处不退出
+                    builder.setCancelable(false);
                     builder.setPositiveButton("Search", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             String mucis = editText.getText().toString();
                             String url;
-                            try{
-                                 url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.search.catalogSug&query="+URLEncoder.encode(mucis,"UTF-8");
-                            }catch(UnsupportedEncodingException e){
+                            try {
+                                url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.search.catalogSug&query=" + URLEncoder.encode(mucis, "UTF-8");
+                            } catch (UnsupportedEncodingException e) {
                                 e.printStackTrace();
                                 url = "";
                             }
@@ -94,55 +101,53 @@ public class MainActivity extends AppCompatActivity {
                                     new Response.Listener<JSONObject>() {
                                         @Override
                                         public void onResponse(JSONObject response) {
-                                            try{
+                                            try {
                                                 JSONArray j = response.getJSONArray("song");
-                                                JSONObject x= j.getJSONObject(0);
+                                                JSONObject x = j.getJSONObject(0);
                                                 String songid = x.getString("songid");
-                                                String url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.song.downWeb&songid="+songid+"&bit=flac&_t="+System.currentTimeMillis();
+                                                String url = "http://tingapi.ting.baidu.com/v1/restserver/ting?format=json&calback=&from=webapp_music&method=baidu.ting.song.downWeb&songid=" + songid + "&bit=flac&_t=" + System.currentTimeMillis();
                                                 mQueue.add(new JsonObjectRequest(url, null,
                                                         new Response.Listener<JSONObject>() {
                                                             @Override
                                                             public void onResponse(JSONObject response) {
                                                                 Log.d(TAG, response.toString());
-                                                                try{
+                                                                try {
                                                                     JSONArray ja = response.getJSONArray("bitrate");
                                                                     int maxbitrate = 0;
                                                                     int maxcount = 0;
                                                                     boolean filelink = true;
-                                                                    for(int i = 0 ; i < ja.length();i++){
+                                                                    for (int i = 0; i < ja.length(); i++) {
                                                                         JSONObject x = ja.getJSONObject(i);
 
-                                                                        if(x.getInt("file_bitrate") > maxbitrate){
-                                                                            if(!x.getString("show_link").equals("")){
-                                                                                filelink = false;
+                                                                        if (x.getInt("file_bitrate") > maxbitrate) {
+                                                                            if (!x.getString("file_link").equals("")) {
+                                                                                filelink = true;
                                                                                 maxbitrate = x.getInt("file_bitrate");
                                                                                 maxcount = i;
-                                                                            }
-                                                                            else if (!x.getString("file_link").equals("")){
-                                                                                filelink = true;
+                                                                            } else if (!x.getString("show_link").equals("")) {
+                                                                                filelink = false;
                                                                                 maxbitrate = x.getInt("file_bitrate");
                                                                                 maxcount = i;
                                                                             }
                                                                         }
                                                                     }
-                                                                    Log.d(TAG,"link is " + (filelink?"file_link":"show_link"));
-                                                                    String link = ja.getJSONObject(maxcount).getString(filelink?"file_link":"show_link");
+                                                                    String link = ja.getJSONObject(maxcount).getString(filelink ? "file_link" : "show_link");
                                                                     Log.d(TAG, "下载地址" + link);
                                                                     //将下载地址复制到剪贴板
                                                                     //ClipboardManager clip = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
                                                                     //clip.setPrimaryClip(ClipData.newPlainText(null,link));
-                                                                    if(!link.equals("")){
+                                                                    //暂时以浏览器的方式打开下载链接
+                                                                    if (!link.equals("")) {
                                                                         Intent intent = new Intent();
                                                                         intent.setAction("android.intent.action.VIEW");
                                                                         Uri content_url = Uri.parse(link);
                                                                         intent.setData(content_url);
                                                                         startActivity(intent);
-                                                                    }
-                                                                    else{
-                                                                        Toast.makeText(MainActivity.this,"获取下载地址失败",Toast.LENGTH_SHORT).show();
+                                                                    } else {
+                                                                        Toast.makeText(MainActivity.this, "获取下载地址失败", Toast.LENGTH_SHORT).show();
                                                                     }
 
-                                                                }catch (JSONException e){
+                                                                } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
                                                             }
@@ -152,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                                                         Log.e(TAG, error.getMessage(), error);
                                                     }
                                                 }));
-                                            }catch (JSONException e){
+                                            } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
 
@@ -173,6 +178,15 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                     builder.show();
+                    //show出dialog后，直接显示软键盘
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE))
+                                    .toggleSoftInput(0,
+                                            InputMethodManager.HIDE_NOT_ALWAYS);
+                        }
+                    }, 100);
                     break;
             }
             if (!msg.equals("")) {
