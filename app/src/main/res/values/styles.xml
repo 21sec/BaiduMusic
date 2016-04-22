@@ -7,9 +7,17 @@
     <style name="AppTheme.Base" parent="Theme.AppCompat">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="colorPrimary" >@color/accent_material_light</item>
-        <item name="colorPrimaryDark">@color/accent_material_light</item>
+        <item name="colorPrimary" >#1b86da</item>
+        <item name="colorPrimaryDark">#1b86da</item>
         <item name="android:windowBackground">@color/background_floating_material_light</item>
+    </style>
+
+    <style name="SearchDialog" parent="SDL.Dialog">
+        <item name="sdlTextPrimaryColor">#1b86da</item>
+        <item name="sdlTextSecondaryColor">#1b86da</item>
+        <item name="sdlDividerColor">#1b86da</item>
+        <item name="sdlPressedColor">#1b86da</item>
+        <item name="colorAccent">#1b86da</item>
     </style>
 
 </resources>
