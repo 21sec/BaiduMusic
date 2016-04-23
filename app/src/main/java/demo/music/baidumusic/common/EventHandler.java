@@ -1,9 +1,11 @@
 package demo.music.baidumusic.common;
 
 /**
- * Created by tcl on 16/4/22.
+ * handler 消息
  */
 public class EventHandler {
-    public static final int PARSE_SEARCH_SONG_ID    = 0x100;
-    public static final int PARSE_SEARCH_SONG_LINK  = 0x200;
+    public static final int PARSE_SEARCH_ARTIST_ID   = 0x10;
+    public static final int PARSE_SEARCH_SONG_LIST   = 0x20;
+    public static final int PARSE_SEARCH_ARTIST_LIST = 0x30;
+    public static final int PARSE_SEARCH_SONG_LINK   = 0x40;
 }

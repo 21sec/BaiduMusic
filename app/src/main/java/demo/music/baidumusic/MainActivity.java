@@ -10,41 +10,49 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
+import demo.music.baidumusic.api.JsonParse;
 import demo.music.baidumusic.common.EventHandler;
+import demo.music.baidumusic.common.SongInfo;
 import demo.music.baidumusic.view.SearchDialog;
 
 public class MainActivity extends AppCompatActivity {
     final static String TAG = "BaiduMusic";
-    private RequestQueue mQueue;
-    private JsonObjectRequest jsonObjectRequest;
     private Handler mHandler;
+    public static RequestQueue mQueue;
+    private static JsonParse jsonParse;
 
     //直接用 Handler类初始化可能会引起内存泄露
     private static class WeakHandler extends Handler{
         private final WeakReference<MainActivity> mActivity;
 
         public WeakHandler(MainActivity activity){
-            mActivity = new WeakReference<MainActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
             MainActivity activity = mActivity.get();
+
             if(activity != null){
-                switch (msg.what){
-                    case EventHandler.PARSE_SEARCH_SONG_ID:
-                        Log.d(TAG,(String)msg.obj);
+                ArrayList<SongInfo> arrayList;
+                switch (msg.what) {
+                    //更新listView
+                    case EventHandler.PARSE_SEARCH_SONG_LIST:
+                        arrayList = (ArrayList<SongInfo>)msg.obj;
+                        break;
+                    case EventHandler.PARSE_SEARCH_ARTIST_LIST:
+                        arrayList = (ArrayList<SongInfo>)msg.obj;
                         break;
                     case EventHandler.PARSE_SEARCH_SONG_LINK:
+                        //通过ViewList 点击动作,将songid 通过 downweb接口下载
                         break;
-                    default:
-                        Log.e(TAG,"The msg is undefined");
                 }
+
             }
         }
     }
@@ -62,12 +70,10 @@ public class MainActivity extends AppCompatActivity {
         //toolbar 右侧的图标点击后，触发回调
         toolbar.setOnMenuItemClickListener(onMenuItemClick);
 
+        mHandler = new WeakHandler(this);
 
         //创建volley的工作队列
         mQueue = Volley.newRequestQueue(getApplicationContext());
-        mHandler = new WeakHandler(this);
-
-        //初始化dialog
     }
 
 
