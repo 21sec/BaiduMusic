@@ -79,7 +79,7 @@ public class BaiduHttpApi {
                 url = HTTP_HEAD+HTTP_CATALOGSUG+"&query="+ msgURLEncode;
                 break;
             case EventHandler.PARSE_SEARCH_ARTIST_LIST:
-                url = HTTP_HEAD+HTTP_ARTIST_GETSONGLIST+"&tinguid="+msgURLEncode+"&limits=20&use_cluster=1&order=2";
+                url = HTTP_HEAD+HTTP_ARTIST_GETSONGLIST+"&tinguid="+msgURLEncode+"&limits=100&use_cluster=1&order=2";
                 break;
             case EventHandler.PARSE_SEARCH_SONG_LINK:
                 //获取下载地址的Json url

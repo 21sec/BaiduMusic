@@ -54,6 +54,8 @@ public class JsonParse {
                         break;
 
                     case EventHandler.PARSE_SEARCH_SONG_LINK:
+                        msg.obj = getSongLink(response);
+                        mHandler.sendMessage(msg);
                         break;
                 }
             }
@@ -86,6 +88,7 @@ public class JsonParse {
                 }
             }
         }catch (JSONException e){
+            arrayList = null;
             e.printStackTrace();
         }
 
@@ -125,10 +128,41 @@ public class JsonParse {
                 }
             }
         }catch (JSONException e){
+            arrayList = null;
             e.printStackTrace();
         }
 
 
         return arrayList;
+    }
+
+    private String getSongLink(JSONObject response){
+        String link = "";
+        try{
+            JSONArray ja = response.getJSONArray("bitrate");
+            int maxbitrate = 0;
+            int maxcount = 0;
+            boolean file_link = true;
+            for(int i = 0 ; i < ja.length();i++){
+                JSONObject jo = ja.getJSONObject(i);
+                if(jo.getInt("file_bitrate") > maxbitrate){
+                    Log.d("ruifeng",""+jo.getInt("file_bitrate"));
+                    if(!jo.getString("file_link").equals("")){
+                        maxbitrate = jo.getInt("file_bitrate");
+                        maxcount = i;
+                        file_link = true;
+                    }
+                    else if(!jo.getString("show_link").equals("")){
+                        maxbitrate = jo.getInt("file_bitrate");
+                        maxcount = i;
+                        file_link = false;
+                    }
+                }
+            }
+            link = ja.getJSONObject(maxcount).getString(file_link?"file_link":"show_link");
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+        return link;
     }
 }

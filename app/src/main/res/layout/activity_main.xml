@@ -8,4 +8,15 @@
         android:layout_width="match_parent"
         android:background="?attr/colorPrimary">
     </android.support.v7.widget.Toolbar>
+
+    <ListView
+        android:background="@color/sdl_background_light"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/listView"
+        android:divider="#d7d7d7"
+        android:dividerHeight="1dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
