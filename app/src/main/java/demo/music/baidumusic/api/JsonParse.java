@@ -63,6 +63,7 @@ public class JsonParse {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.e("BaiduMusic", error.getMessage(), error);
+                msg.what = EventHandler.PARSE_TIMEOUT;
             }
         });
     }
