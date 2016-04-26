@@ -88,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("ruifeng",link);
                         }
                         break;
+                    case EventHandler.PARSE_TIMEOUT:
+                        Toast.makeText(activity,"网络连接超时,请稍候再试",Toast.LENGTH_LONG).show();
+                        break;
                 }
 
             }
