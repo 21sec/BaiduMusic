@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         // Title
         toolbar.setTitle("BaiduMusic");
         // Sub Title
-        toolbar.setSubtitle("0.1Base");
+        toolbar.setSubtitle("1.0v");
         setSupportActionBar(toolbar);
         //设置 navigation 需要在setSupportActionBar之后
         toolbar.setNavigationIcon(R.mipmap.ab_android);
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                     firstTime = secondTime;//更新firstTime
                     return true;
                 } else {//两次按键小于3秒时，退出应用
-                    System.exit(0);
+                    finish();
                 }
                 break;
         }
