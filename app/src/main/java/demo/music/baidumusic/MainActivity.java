@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -85,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
                             Uri content_url = Uri.parse(link);
                             intent.setData(content_url);
                             activity.startActivity(intent);
-                            Log.d("ruifeng",link);
                         }
                         break;
                     case EventHandler.PARSE_TIMEOUT:
@@ -191,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     firstTime = secondTime;//更新firstTime
                     return true;
                 } else {//两次按键小于3秒时，退出应用
-                    System.exit(0);
+                    finish();
                 }
                 break;
         }
